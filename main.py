@@ -9,7 +9,6 @@ import aiohttp
 app_name = APIkeys.app_name
 app_secret = APIkeys.app_secret
 app_key = APIkeys.app_key
-patient_id = 20860460
 start_date = "2024-10-30T00:00:00"
 end_date = "2024-08-02T00:00:00"
 
@@ -24,7 +23,7 @@ soap_payload = f"""<?xml version="1.0" encoding="utf-8"?>
         <AppKey>{app_key}</AppKey>
       </Authentication>
       <SearchFilters>
-        <CaregiverCode>ANT-</CaregiverCode>
+        <Status>Active</Status>
       </SearchFilters>
     </SearchCaregivers>
   </soap:Body>
