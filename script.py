@@ -28,6 +28,15 @@ df_notes = pd.read_csv(
 df_notes['Date'] = pd.to_datetime(df_notes['Date'])
 df_notes = df_notes.rename(columns={'Date': 'Discipline Date'})
 
+df_final = pd.read_csv(
+    "C:\\Users\\nochum.paltiel\\OneDrive - Anchor Home Health care\\Documents\\Caregiver Team Report\\Disciplinary Final.csv")
+new_final = df_notes[df_notes['Subject'] == 'Disciplinary Final'][['Caregiver Code - Office']].copy()
+new_final.name = 'Caregiver Code - Office'
+df_final = pd.concat([df_final, new_final], ignore_index=True)
+df_final.drop_duplicates()
+csv_file = "C:\\Users\\nochum.paltiel\\OneDrive - Anchor Home Health care\\Documents\\Caregiver Team Report\\Disciplinary Final.csv"
+df_final.to_csv(csv_file, index=False)
+
 # Define the conditions and choices for Discipline Expiry Date
 conditions = [
     df_notes['Subject'] == 'Disciplinary Verbal',
@@ -52,10 +61,6 @@ idx = df_notes_filtered.groupby('Caregiver Code - Office')['Expiry Date'].idxmax
 
 # Use the index to select the corresponding Discipline Date and Expiry Date
 latest_expiry = df_notes.loc[idx, ['Caregiver Code - Office', 'Discipline Date', 'Expiry Date']].reset_index(drop=True)
-
-# idx = df_notes.groupby('Caregiver Code - Office')['Expiry Date'].idxmax()
-# # Use the index to select the corresponding Date and Expiry Date
-# latest_expiry = df_notes.loc[idx, ['Caregiver Code - Office', 'Discipline Date', 'Expiry Date']].reset_index(drop=True)
 latest_expiry['Expiry Date'] = pd.to_datetime(latest_expiry['Expiry Date']).dt.date
 
 active_caregivers = pd.merge(active_caregivers, latest_expiry, on='Caregiver Code - Office',
@@ -113,7 +118,10 @@ make_tier2 = active_caregivers[(active_caregivers['Team'] != 'Tier 2') & (
         active_caregivers['Disciplinary'] == True)].copy().reset_index(drop=True)
 
 # Those that should be moved back to Tier 1
-back_to_1 = active_caregivers[(active_caregivers['Team'] == 'Tier 2') & (
-        active_caregivers['Disciplinary'] == False)].copy().reset_index(drop=True)
+back_to_1 = active_caregivers[
+    (active_caregivers['Team'] == 'Tier 2') &
+    (active_caregivers['Disciplinary'] == False) &
+    (~active_caregivers['Caregiver Code - Office'].isin(df_final['Caregiver Code - Office']))
+    ].copy().reset_index(drop=True)
 
 make_tier1 = pd.concat([make_tier1, back_to_1], ignore_index=True)
