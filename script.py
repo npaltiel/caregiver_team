@@ -1,19 +1,6 @@
-import APIkeys
-import requests
-import xml.etree.ElementTree as ET
-import pandas as pd
-import time
-import asyncio
-import aiohttp
 import pandas as pd
 import numpy as np
-import sqlite3
 from datetime import date, datetime, timedelta
-from dateutil.relativedelta import relativedelta
-
-app_name = APIkeys.app_name
-app_secret = APIkeys.app_secret
-app_key = APIkeys.app_key
 
 df_caregivers = pd.read_csv(
     "C:\\Users\\nochum.paltiel\\OneDrive - Anchor Home Health care\\Documents\\Caregiver Team Report\\List of Caregivers (Quality).csv")
