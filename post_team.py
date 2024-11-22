@@ -46,7 +46,7 @@ async def update_team(caregiver, team):
                 <SSN>{caregiver['SSN']}</SSN>
                 {rehire}
                 <StatusID>1</StatusID>
-                <EmploymentTypes><Discipline>HCSS</Discipline></EmploymentTypes>
+                <EmploymentTypes>{employment_types}</EmploymentTypes>
                 <ApplicationDate>{caregiver['Application Date']}</ApplicationDate>
                 <TeamID>{team}</TeamID>
                 <HHAPCARegistryNumber>{caregiver['HHA/PCA Registry Number']}</HHAPCARegistryNumber>
