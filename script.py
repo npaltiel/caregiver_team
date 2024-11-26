@@ -16,12 +16,12 @@ async def main():
 
     active_caregivers['Hire Date'] = pd.to_datetime(active_caregivers['Hire Date'])
     active_caregivers['Rehire Date'] = pd.to_datetime(active_caregivers['Rehire Date'],
-                                                      format="%m/%d/%Y %I:%M:%S %p").dt.strftime('%Y-%m-%d')
+                                                      format='%m/%d/%Y %H:%M').dt.strftime('%Y-%m-%d')
     active_caregivers['First Work Date'] = pd.to_datetime(active_caregivers['First Work Date'])
     active_caregivers['Last Work Date'] = pd.to_datetime(active_caregivers['Last Work Date'])
     active_caregivers['DOB'] = pd.to_datetime(active_caregivers['DOB'], format='%m/%d/%Y').dt.strftime('%Y-%m-%d')
     active_caregivers['Application Date'] = pd.to_datetime(active_caregivers['Application Date'],
-                                                           format="%m/%d/%Y %I:%M:%S %p").dt.strftime('%Y-%m-%d')
+                                                           format='%m/%d/%Y %H:%M').dt.strftime('%Y-%m-%d')
 
     # Get Notification Method ID for each caregiver
     notifications_dict = await get_notification_methods()
