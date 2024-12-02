@@ -12,7 +12,11 @@ async def main():
 
     # Get only active employees and format the dataframe where relevant
     active_caregivers = df_caregivers[
-        (df_caregivers['Status'] == "Active") & (df_caregivers['Type'] == 'Employee')].copy().reset_index(drop=True)
+        (df_caregivers['Status'] == "Active") &
+        (df_caregivers['Type'] == 'Employee') &
+        (~df_caregivers['Caregiver Code - Office'].str.contains("CDP", na=False)) &
+        (~df_caregivers['Caregiver Code - Office'].str.contains("OHZ", na=False))
+        ].copy().reset_index(drop=True)
 
     active_caregivers['Hire Date'] = pd.to_datetime(active_caregivers['Hire Date'])
     active_caregivers['Rehire Date'] = pd.to_datetime(active_caregivers['Rehire Date'],
