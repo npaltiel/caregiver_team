@@ -8,7 +8,7 @@ from post_team import update_team
 
 async def main():
     df_caregivers = pd.read_csv(
-        "C:\\Users\\nochum.paltiel\\OneDrive - Anchor Home Health care\\Documents\\Caregiver Team Report\\List of Caregivers (Quality).csv")
+        "C:\\Users\\nochu\\OneDrive - Anchor Home Health care\\Documents\\Caregiver Team Report\\List of Caregivers (Quality).csv")
 
     # Get only active employees and format the dataframe where relevant
     active_caregivers = df_caregivers[
@@ -36,17 +36,17 @@ async def main():
                                             range(len(active_caregivers))]
 
     df_notes = pd.read_csv(
-        "C:\\Users\\nochum.paltiel\\OneDrive - Anchor Home Health care\\Documents\\Caregiver Team Report\\Caregiver Notes.csv")
+        "C:\\Users\\nochu\\OneDrive - Anchor Home Health care\\Documents\\Caregiver Team Report\\Caregiver Notes.csv")
     df_notes['Date'] = pd.to_datetime(df_notes['Date'])
     df_notes = df_notes.rename(columns={'Date': 'Discipline Date'})
 
     df_final = pd.read_csv(
-        "C:\\Users\\nochum.paltiel\\OneDrive - Anchor Home Health care\\Documents\\Caregiver Team Report\\Disciplinary Final.csv")
+        "C:\\Users\\nochu\\OneDrive - Anchor Home Health care\\Documents\\Caregiver Team Report\\Disciplinary Final.csv")
     new_final = df_notes[df_notes['Subject'] == 'Disciplinary Final'][['Caregiver Code - Office']].copy()
     new_final.name = 'Caregiver Code - Office'
     df_final = pd.concat([df_final, new_final], ignore_index=True)
-    df_final.drop_duplicates()
-    csv_file = "C:\\Users\\nochum.paltiel\\OneDrive - Anchor Home Health care\\Documents\\Caregiver Team Report\\Disciplinary Final.csv"
+    df_final.drop_duplicates(inplace=True)
+    csv_file = "C:\\Users\\nochu\\OneDrive - Anchor Home Health care\\Documents\\Caregiver Team Report\\Disciplinary Final.csv"
     df_final.to_csv(csv_file, index=False)
 
     # Define the conditions and choices for Discipline Expiry Date
@@ -81,20 +81,22 @@ async def main():
     active_caregivers = pd.merge(active_caregivers, latest_expiry, on='Caregiver Code - Office',
                                  how='left')
     active_caregivers['Disciplinary'] = np.where(
-        (
-                active_caregivers['Expiry Date'].isnull() &
-                (active_caregivers['Last Work Date'] > (datetime.today() - timedelta(days=90)))
-        )
-        |
-        (
-                active_caregivers['Expiry Date'].isnull() &
-                (active_caregivers['Team'] != 'Tier 2')
-        )
-        |
-        (
-                (active_caregivers['Expiry Date'] <= datetime.today().date()) &
-                (active_caregivers['Last Work Date'] > active_caregivers['Discipline Date'])
-        ),
+        (~active_caregivers['Caregiver Code - Office'].isin(df_final['Caregiver Code - Office']))
+        &
+        ((
+                 active_caregivers['Expiry Date'].isnull() &
+                 (active_caregivers['Last Work Date'] > (datetime.today() - timedelta(days=90)))
+         )
+         |
+         (
+                 active_caregivers['Expiry Date'].isnull() &
+                 (active_caregivers['Team'] != 'Tier 2')
+         )
+         |
+         (
+                 (active_caregivers['Expiry Date'] <= datetime.today().date()) &
+                 (active_caregivers['Last Work Date'] > active_caregivers['Discipline Date'])
+         )),
         False,
         True
     )
@@ -144,9 +146,6 @@ async def main():
     prob_dict = make_probation.to_dict(orient='index')
     tier1_dict = make_tier1.to_dict(orient='index')
     tier2_dict = make_tier2.to_dict(orient='index')
-
-    test = active_caregivers[active_caregivers['Caregiver Code - Office'] == "ANT-11755"]
-    test_dict = test.to_dict(orient='index')
 
     teams_dict = await get_teams()
     # Gather async tasks for team updates
