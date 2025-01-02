@@ -8,7 +8,7 @@ from post_team import update_team
 
 async def main():
     df_caregivers = pd.read_csv(
-        "C:\\Users\\nochu\\OneDrive - Anchor Home Health care\\Documents\\Caregiver Team Report\\List of Caregivers (Quality).csv")
+        "C:\\Users\\nochum.paltiel\\OneDrive - Anchor Home Health care\\Documents\\Caregiver Team Report\\List of Caregivers (Quality).csv")
 
     # Get only active employees and format the dataframe where relevant
     active_caregivers = df_caregivers[
@@ -27,6 +27,17 @@ async def main():
     active_caregivers['Application Date'] = pd.to_datetime(active_caregivers['Application Date'],
                                                            format='%m/%d/%Y %H:%M').dt.strftime('%Y-%m-%d')
 
+    # problematic_codes = [
+    #     "ANT-37620", "ANT-34397", "ANT-37597", "ANT-35482", "ANT-36122", "ANT-36189",
+    #     "ANT-36398", "ANT-36510", "ANT-36853", "ANT-36936", "ANT-37031", "ANT-37018",
+    #     "ANT-37169", "ANT-37155", "ANT-37229", "ANT-37248", "ANT-37297", "ANT-25554",
+    #     "ANT-7459", "ANT-21252", "ANT-28293", "ANT-29028", "ANT-29270", "ANT-29643",
+    #     "ANT-29879", "ANT-30105", "ANT-14653", "ANT-2646", "ANT-14241", "ANT-32833",
+    #     "ANT-35112", "ANT-33387", "ANT-5446"
+    # ]
+    # active_caregivers = active_caregivers[
+    #     active_caregivers['Caregiver Code - Office'].isin(problematic_codes)].reset_index()
+
     # Get Notification Method ID for each caregiver
     notifications_dict = await get_notification_methods()
     notifications_dict['Voice Mail'] = notifications_dict['Voice Message']
@@ -36,17 +47,17 @@ async def main():
                                             range(len(active_caregivers))]
 
     df_notes = pd.read_csv(
-        "C:\\Users\\nochu\\OneDrive - Anchor Home Health care\\Documents\\Caregiver Team Report\\Caregiver Notes.csv")
+        "C:\\Users\\nochum.paltiel\\OneDrive - Anchor Home Health care\\Documents\\Caregiver Team Report\\Caregiver Notes.csv")
     df_notes['Date'] = pd.to_datetime(df_notes['Date'])
     df_notes = df_notes.rename(columns={'Date': 'Discipline Date'})
 
     df_final = pd.read_csv(
-        "C:\\Users\\nochu\\OneDrive - Anchor Home Health care\\Documents\\Caregiver Team Report\\Disciplinary Final.csv")
+        "C:\\Users\\nochum.paltiel\\OneDrive - Anchor Home Health care\\Documents\\Caregiver Team Report\\Disciplinary Final.csv")
     new_final = df_notes[df_notes['Subject'] == 'Disciplinary Final'][['Caregiver Code - Office']].copy()
     new_final.name = 'Caregiver Code - Office'
     df_final = pd.concat([df_final, new_final], ignore_index=True)
     df_final.drop_duplicates(inplace=True)
-    csv_file = "C:\\Users\\nochu\\OneDrive - Anchor Home Health care\\Documents\\Caregiver Team Report\\Disciplinary Final.csv"
+    csv_file = "C:\\Users\\nochum.paltiel\\OneDrive - Anchor Home Health care\\Documents\\Caregiver Team Report\\Disciplinary Final.csv"
     df_final.to_csv(csv_file, index=False)
 
     # Define the conditions and choices for Discipline Expiry Date
@@ -149,6 +160,7 @@ async def main():
 
     teams_dict = await get_teams()
     # Gather async tasks for team updates
+
     results = await asyncio.gather(
         *(update_team(prob_dict[caregiver], teams_dict['Probation']) for caregiver in prob_dict),
         *(update_team(tier1_dict[caregiver], teams_dict['Tier 1']) for caregiver in tier1_dict),

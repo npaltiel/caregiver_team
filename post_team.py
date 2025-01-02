@@ -2,7 +2,7 @@ from APIkeys import app_name, app_secret, app_key
 import math
 import xml.etree.ElementTree as ET
 from get_requests import get_caregiver_id
-from asynchronous import async_soap_request
+from asynchronous import retry_soap_request
 
 
 def get_employment_types(caregiver):
@@ -63,7 +63,7 @@ async def update_team(caregiver, team):
           </soap:Body>
         </soap:Envelope>"""
 
-        response_content = await async_soap_request('https://app.hhaexchange.com/integration/ent/v1.8/ws.asmx', payload,
+        response_content = await retry_soap_request('https://app.hhaexchange.com/integration/ent/v1.8/ws.asmx', payload,
                                                     '"https://www.hhaexchange.com/apis/hhaws.integration/UpdateCaregiverDemographics"')
         # Check response content for success (you may want to look for specific elements in `response_content` if needed)
         if "Success" in response_content:  # Replace "Success" with the actual success check from response
