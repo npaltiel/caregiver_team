@@ -15,6 +15,7 @@ async def main():
         (df_caregivers['Status'] == "Active") &
         (df_caregivers['Type'] == 'Employee') &
         (~df_caregivers['Caregiver Code - Office'].str.contains("CDP", na=False)) &
+        (~df_caregivers['Caregiver Code - Office'].str.contains("ANS", na=False)) &
         (~df_caregivers['Caregiver Code - Office'].str.contains("OHZ", na=False))
         ].copy().reset_index(drop=True)
 
@@ -27,14 +28,7 @@ async def main():
     active_caregivers['Application Date'] = pd.to_datetime(active_caregivers['Application Date'],
                                                            format='%m/%d/%Y %H:%M').dt.strftime('%Y-%m-%d')
 
-    # problematic_codes = [
-    #     "ANT-37620", "ANT-34397", "ANT-37597", "ANT-35482", "ANT-36122", "ANT-36189",
-    #     "ANT-36398", "ANT-36510", "ANT-36853", "ANT-36936", "ANT-37031", "ANT-37018",
-    #     "ANT-37169", "ANT-37155", "ANT-37229", "ANT-37248", "ANT-37297", "ANT-25554",
-    #     "ANT-7459", "ANT-21252", "ANT-28293", "ANT-29028", "ANT-29270", "ANT-29643",
-    #     "ANT-29879", "ANT-30105", "ANT-14653", "ANT-2646", "ANT-14241", "ANT-32833",
-    #     "ANT-35112", "ANT-33387", "ANT-5446"
-    # ]
+    # problematic_codes = []
     # active_caregivers = active_caregivers[
     #     active_caregivers['Caregiver Code - Office'].isin(problematic_codes)].reset_index()
 
@@ -167,13 +161,36 @@ async def main():
         *(update_team(tier2_dict[caregiver], teams_dict['Tier 2']) for caregiver in tier2_dict)
     )
 
+    retry_caregivers = [caregiver_code for caregiver_code, success, error_message in results if
+                        not success]
+    retry_prob = {
+        key: details for key, details in prob_dict.items()
+        if details.get('Caregiver Code - Office') in retry_caregivers
+    }
+    retry_tier1 = {
+        key: details for key, details in tier1_dict.items()
+        if details.get('Caregiver Code - Office') in retry_caregivers
+    }
+    retry_tier2 = {
+        key: details for key, details in tier2_dict.items()
+        if details.get('Caregiver Code - Office') in retry_caregivers
+    }
+
+    results2 = await asyncio.gather(
+        *(update_team(retry_prob[caregiver], teams_dict['Probation']) for caregiver in retry_prob),
+        *(update_team(retry_tier1[caregiver], teams_dict['Tier 1']) for caregiver in retry_tier1),
+        *(update_team(retry_tier2[caregiver], teams_dict['Tier 2']) for caregiver in retry_tier2)
+    )
+
     # Count successes and collect failure codes
-    success_count = sum(1 for _, success, _ in results if success)
-    failed_caregivers = [(caregiver_code, error_message) for caregiver_code, success, error_message in results if
+    first_success_count = sum(1 for _, success, _ in results if success)
+    second_success_count = sum(1 for _, success, _ in results2 if success)
+    failed_caregivers = [(caregiver_code, error_message) for caregiver_code, success, error_message in results2 if
                          not success]
 
     # Output results
-    print(f"Total successes: {success_count}")
+    print(f"Initial successes: {first_success_count}")
+    print(f"Secondary successes: {second_success_count}")
     print(f"Total failures: {len(failed_caregivers)}")
     print("Failed Caregiver Codes and Error Messages:")
 
