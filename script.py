@@ -27,9 +27,9 @@ async def main():
     active_caregivers['Application Date'] = pd.to_datetime(active_caregivers['Application Date']).dt.strftime(
         '%Y-%m-%d')
 
-    # problematic_codes = []
-    # active_caregivers = active_caregivers[
-    #     active_caregivers['Caregiver Code - Office'].isin(problematic_codes)].reset_index()
+    problematic_codes = ['ANT-11755']
+    active_caregivers = active_caregivers[
+        active_caregivers['Caregiver Code - Office'].isin(problematic_codes)].reset_index()
 
     # Get Notification Method ID for each caregiver
     notifications_dict = await get_notification_methods()
@@ -139,11 +139,13 @@ async def main():
             active_caregivers['Disciplinary'] == True)].copy().reset_index(drop=True)
 
     # Those that should be moved back to Tier 1
-    back_to_1 = active_caregivers[
-        (active_caregivers['Team'] == 'Tier 2') &
-        (active_caregivers['Disciplinary'] == False) &
-        (~active_caregivers['Caregiver Code - Office'].isin(df_final['Caregiver Code - Office']))
-        ].copy().reset_index(drop=True)
+    # back_to_1 = active_caregivers[
+    #     (active_caregivers['Team'] == 'Tier 2') &
+    #     (active_caregivers['Disciplinary'] == False) &
+    #     (~active_caregivers['Caregiver Code - Office'].isin(df_final['Caregiver Code - Office']))
+    #     ].copy().reset_index(drop=True)
+
+    back_to_1 = active_caregivers
 
     make_tier1 = pd.concat([make_tier1, back_to_1], ignore_index=True)
 
