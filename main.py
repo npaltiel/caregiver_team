@@ -12,7 +12,7 @@ app_key = APIkeys.app_key
 start_date = "2024-10-30T00:00:00"
 end_date = "2024-08-02T00:00:00"
 
-# Define the XML payload with correct SOAP 1.1 envelope for Search Visits
+# Define the XML payload with correct SOAP 1.1 envelope for Search Caregivers
 soap_payload = f"""<?xml version="1.0" encoding="utf-8"?>
 <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
   <soap:Body>
