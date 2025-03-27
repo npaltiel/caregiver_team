@@ -41,7 +41,7 @@ async def main():
 
     df_notes = pd.read_csv(
         "C:\\Users\\nochum.paltiel\\OneDrive - Anchor Home Health care\\Documents\\Caregiver Team Report\\Caregiver Notes.csv")
-    df_notes['Date'] = pd.to_datetime(df_notes['Date'])
+    df_notes['Date'] = pd.to_datetime(df_notes['Date'], format='mixed')
     df_notes = df_notes.rename(columns={'Date': 'Discipline Date'})
 
     df_final = pd.read_csv(
